@@ -3,30 +3,49 @@ const cors = require("cors");
 
 const app = express();
 
+// 🔹 ENV (IMPORTANT)
+require("dotenv").config();
+
 // 🔹 Middlewares
 app.use(cors());
 app.use(express.json());
 
+// 🔹 Logger (DEV ONLY 🔥)
+if (process.env.NODE_ENV === "development") {
+  const morgan = require("morgan");
+  app.use(morgan("dev"));
+}
+
 // 🔹 Routes
-app.use("/api/auth", require("./models/auth/auth.routes"));
+const authRoutes = require("./models/auth/auth.routes");
+const userRoutes = require("./models/user/user.routes");
+const taskRoutes = require("./models/task/task.routes");
+const projectRoutes = require("./models/project/project.routes");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/projects", projectRoutes);
 
 // 🔹 Health Check
 app.get("/health", (req, res) => {
   res.status(200).json({
+    success: true,
     status: "OK",
     server: "Running",
     timestamp: new Date(),
   });
 });
 
-// 🔹 404 Handler (use next)
+// 🔹 404 Handler
 app.use((req, res, next) => {
   res.status(404).json({
-    message: "Route not found",
+    success: false,
+    message: `Route not found: ${req.originalUrl}`,
   });
 });
 
-// 🔹 Global Error Handler
+// 🔹 Global Error Handler (LAST)
 const errorMiddleware = require("./middleware/error.middleware");
 app.use(errorMiddleware);
 

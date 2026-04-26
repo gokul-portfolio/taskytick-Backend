@@ -1,19 +1,88 @@
-const { login } = require("./user.service");
+const {
+  createUser,
+  getUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+} = require("./user.service");
 
-const loginController = async (req, res, next) => {
+// ================= CREATE =================
+const createUserController = async (req, res, next) => {
   try {
-    const data = await login(req.body);
+    const user = await createUser(req.body);
 
-    res.status(200).json({
+    return res.status(201).json({
       success: true,
-      message: "Login successful",
-      data,
+      message: "User created successfully",
+      data: user,
     });
   } catch (err) {
     next(err);
   }
 };
 
+// ================= GET ALL =================
+const getUsersController = async (req, res, next) => {
+  try {
+    const users = await getUsers();
+
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ================= GET ONE =================
+const getUserByIdController = async (req, res, next) => {
+  try {
+    const user = await getUserById(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ================= UPDATE =================
+const updateUserController = async (req, res, next) => {
+  try {
+    const user = await updateUser(req.params.id, req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ================= DELETE =================
+const deleteUserController = async (req, res, next) => {
+  try {
+    await deleteUser(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ✅ EXPORT ALL
 module.exports = {
-  login: loginController,
+  createUser: createUserController,
+  getUsers: getUsersController,
+  getUserById: getUserByIdController,
+  updateUser: updateUserController,
+  deleteUser: deleteUserController,
 };

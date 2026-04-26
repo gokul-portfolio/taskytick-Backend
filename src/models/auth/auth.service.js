@@ -2,10 +2,13 @@ const User = require("../user/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-
+// 🔹 REGISTER
 const register = async ({ name, email, password }) => {
+  if (!name || !email || !password) {
+    throw new Error("All fields are required");
+  }
 
-  
+  // check existing user
   const existing = await User.findOne({ email });
   if (existing) {
     throw new Error("User already exists");
@@ -25,28 +28,42 @@ const register = async ({ name, email, password }) => {
     message: "User registered successfully",
     user: {
       id: user._id,
+      name: user.name,
       email: user.email,
     },
   };
 };
 
-// 🔹 Login
+// 🔹 LOGIN (🔥 FIXED)
 const login = async ({ email, password }) => {
-  const user = await User.findOne({ email });
+  if (!email || !password) {
+    throw new Error("Email and password are required");
+  }
+
+  // 🔥 IMPORTANT FIX → include password
+  const user = await User.findOne({ email }).select("+password");
+
   if (!user) {
     throw new Error("Invalid email or password");
   }
 
+  // 🔥 safety check
+  if (!user.password) {
+    throw new Error("Password not found for user");
+  }
+
+  // compare password
   const isMatch = await bcrypt.compare(password, user.password);
+
   if (!isMatch) {
     throw new Error("Invalid email or password");
   }
 
-  // JWT token
+  // generate token
   const token = jwt.sign(
     {
       id: user._id,
-      role: user.role, 
+      role: user.role || "user",
     },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
