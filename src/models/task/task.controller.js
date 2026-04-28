@@ -1,6 +1,6 @@
 const taskService = require("./task.service");
 
-// CREATE
+// ================= CREATE =================
 const createTask = async (req, res) => {
   try {
     const task = await taskService.createTask(req.body, req.user.id);
@@ -11,40 +11,56 @@ const createTask = async (req, res) => {
       data: task,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// GET ALL
+// ================= GET ALL (ROLE BASED) =================
 const getTasks = async (req, res) => {
   try {
-    const tasks = await taskService.getTasks(req.user.id);
+    // 🔥 FIX: pass full user object
+    const tasks = await taskService.getTasks(req.user);
 
     res.json({
       success: true,
       data: tasks,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// GET ONE
+// ================= GET ONE =================
 const getTask = async (req, res) => {
   try {
     const task = await taskService.getTaskById(req.params.id);
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
     }
 
-    res.json({ success: true, data: task });
+    res.json({
+      success: true,
+      data: task,
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// UPDATE
+// ================= UPDATE =================
 const updateTask = async (req, res) => {
   try {
     const updated = await taskService.updateTask(
@@ -54,25 +70,31 @@ const updateTask = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Task updated",
+      message: "Task updated successfully",
       data: updated,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// DELETE
+// ================= DELETE =================
 const deleteTask = async (req, res) => {
   try {
     await taskService.deleteTask(req.params.id);
 
     res.json({
       success: true,
-      message: "Task deleted",
+      message: "Task deleted successfully",
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 

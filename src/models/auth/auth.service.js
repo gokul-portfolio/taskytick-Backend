@@ -25,6 +25,7 @@ const register = async ({ name, email, password }) => {
   });
 
   return {
+    success: true,
     message: "User registered successfully",
     user: {
       id: user._id,
@@ -34,20 +35,19 @@ const register = async ({ name, email, password }) => {
   };
 };
 
-// 🔹 LOGIN (🔥 FIXED)
+// 🔹 LOGIN (FINAL FIXED)
 const login = async ({ email, password }) => {
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
 
-  // 🔥 IMPORTANT FIX → include password
+  // include password
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
     throw new Error("Invalid email or password");
   }
 
-  // 🔥 safety check
   if (!user.password) {
     throw new Error("Password not found for user");
   }
@@ -59,10 +59,12 @@ const login = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
-  // generate token
+  // 🔥 IMPORTANT FIX → include name & email in token
   const token = jwt.sign(
     {
       id: user._id,
+      name: user.name,       // ✅ ADD
+      email: user.email,     // ✅ ADD
       role: user.role || "user",
     },
     process.env.JWT_SECRET,
@@ -70,6 +72,7 @@ const login = async ({ email, password }) => {
   );
 
   return {
+    success: true,
     message: "Login successful",
     token,
     user: {

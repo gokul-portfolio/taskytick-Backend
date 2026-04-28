@@ -5,7 +5,7 @@ const {
   updateUser,
   deleteUser,
 } = require("./user.service");
-
+const User = require("./user.model")
 // ================= CREATE =================
 const createUserController = async (req, res, next) => {
   try {
@@ -34,6 +34,24 @@ const getUsersController = async (req, res, next) => {
     next(err);
   }
 };
+
+
+
+// ================= GET PROFILE =================
+const getProfileController = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password")
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+
 
 // ================= GET ONE =================
 const getUserByIdController = async (req, res, next) => {
@@ -85,4 +103,5 @@ module.exports = {
   getUserById: getUserByIdController,
   updateUser: updateUserController,
   deleteUser: deleteUserController,
+  getProfile: getProfileController,
 };

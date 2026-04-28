@@ -1,16 +1,14 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
-
-// 🔹 ENV (IMPORTANT)
-require("dotenv").config();
 
 // 🔹 Middlewares
 app.use(cors());
 app.use(express.json());
 
-// 🔹 Logger (DEV ONLY 🔥)
+// 🔹 Logger (DEV ONLY)
 if (process.env.NODE_ENV === "development") {
   const morgan = require("morgan");
   app.use(morgan("dev"));
@@ -23,7 +21,7 @@ const taskRoutes = require("./models/task/task.routes");
 const projectRoutes = require("./models/project/project.routes");
 
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes);     // 👉 includes /me inside user.routes.js
 app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
 
@@ -38,7 +36,7 @@ app.get("/health", (req, res) => {
 });
 
 // 🔹 404 Handler
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.originalUrl}`,

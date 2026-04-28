@@ -2,9 +2,10 @@ const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
   try {
-    // 🔹 get token from header
+    // 🔹 1. Get Authorization header
     const authHeader = req.headers.authorization;
 
+    // 🔹 2. Check header format
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
@@ -12,20 +13,24 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
-    // 🔹 extract token
+    // 🔹 3. Extract token
     const token = authHeader.split(" ")[1];
 
-    // 🔹 verify token
+    // 🔹 4. Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 🔹 attach user to request
+    // 🔹 5. Attach user to request
     req.user = decoded;
 
+    // 🔹 6. Continue
     next();
+
   } catch (err) {
+    console.error("Auth Middleware Error:", err.message);
+
     return res.status(401).json({
       success: false,
-      message: "Unauthorized - Invalid token",
+      message: "Unauthorized - Invalid or Expired token",
     });
   }
 };

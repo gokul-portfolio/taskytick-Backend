@@ -1,6 +1,6 @@
 const Task = require("./task.model");
 
-// CREATE
+// ================= CREATE =================
 const createTask = async (data, userId) => {
   return await Task.create({
     ...data,
@@ -8,26 +8,40 @@ const createTask = async (data, userId) => {
   });
 };
 
-// GET ALL
-const getTasks = async (userId) => {
-  return await Task.find({ createdBy: userId })
-    .populate("assignedTo", "name email")
+// ================= GET ALL (ROLE BASED) =================
+const getTasks = async (user) => {
+
+  // ✅ ADMIN → ALL TASKS
+  if (user.role === "admin") {
+    return await Task.find()
+      .populate("assignedTo", "name email department")
+      .sort({ createdAt: -1 });
+  }
+
+  // ✅ NORMAL USER → ONLY THEIR TASKS
+  return await Task.find({
+    assignedTo: user.id,
+  })
+    .populate("assignedTo", "name email department")
     .sort({ createdAt: -1 });
 };
 
-// GET SINGLE
+// ================= GET ONE =================
 const getTaskById = async (id) => {
-  return await Task.findById(id).populate("assignedTo");
+  return await Task.findById(id).populate(
+    "assignedTo",
+    "name email department"
+  );
 };
 
-// UPDATE
+// ================= UPDATE =================
 const updateTask = async (id, data) => {
   return await Task.findByIdAndUpdate(id, data, {
     new: true,
-  });
+  }).populate("assignedTo", "name email department");
 };
 
-// DELETE
+// ================= DELETE =================
 const deleteTask = async (id) => {
   return await Task.findByIdAndDelete(id);
 };
